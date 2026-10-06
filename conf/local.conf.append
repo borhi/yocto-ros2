@@ -23,6 +23,10 @@ DISTRO_FEATURES:append = " virtualization"
 # ros-core doesn't need Fortran; skipping it avoids rebuilding gcc with gfortran.
 ROS_WORLD_SKIP_GROUPS:append = " fortran"
 
+# Extra packages for rpi5-ssh-image (it includes ${CORE_IMAGE_EXTRA_INSTALL}),
+# so the image recipe itself doesn't need to change
+CORE_IMAGE_EXTRA_INSTALL:append = " custom-counter"
+
 # Save disk space
 INHERIT += "rm_work"
 

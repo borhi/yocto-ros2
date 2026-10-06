@@ -17,6 +17,7 @@ meta-custom/             custom layer
   recipes-core/init-ifupdown/  wlan0 autostart, DHCP hostname
   recipes-connectivity/        sshd policy, Wi-Fi config
   recipes-bsp/u-boot/          U-Boot 2025.01
+  recipes-ros/custom-counter/  ROS 2 package custom_counter (git submodule)
 scripts/build.sh         build (runs bitbake in Docker)
 scripts/verify-ssh.sh    SSH check without hardware
 deploy/                  build output
@@ -109,6 +110,8 @@ ssh -i ~/.ssh/id_ed25519 pi@<ip>    # the key from SSH_PUBKEY, or PI_PASSWORD
 
 When `WIFI_SSID` is set, `wlan0` comes up at boot via `wpa_supplicant` and DHCP.
 The config lives in `/etc/wpa_supplicant/wpa_supplicant-wlan0.conf` (mode 0600).
+Wi-Fi power save is turned off when `wlan0` comes up: with it on, the Pi
+answers ARP/ping unreliably and may look absent from the network.
 
 - Only WPA2-PSK (or WPA2/WPA3 mixed) works, not WPA3-only: the image stores
   the derived PSK instead of the passphrase.
@@ -147,6 +150,29 @@ skipped (`ROS_WORLD_SKIP_GROUPS += "fortran"`), because `ros-core` doesn't need
 it and enabling it would rebuild gcc. To add more ROS packages, list them in
 `IMAGE_INSTALL`. Recipe names use dashes, e.g. `demo-nodes-cpp` for
 `demo_nodes_cpp`.
+
+### custom_counter
+
+`meta-custom/recipes-ros/custom-counter/files/ros2-custom-counter` is a git
+submodule with the [ros2-custom-counter](https://github.com/borhi/ros2-custom-counter)
+package. The `custom-counter` recipe builds it from that directory, so the image
+gets exactly the commit the submodule points to. It goes into the image through
+`CORE_IMAGE_EXTRA_INSTALL` in `conf/local.conf.append`. Clone this repo with
+`--recurse-submodules`, or run `git submodule update --init` after cloning.
+
+To move to a newer commit:
+
+```sh
+git submodule update --remote meta-custom/recipes-ros/custom-counter/files/ros2-custom-counter
+git commit -am "custom-counter: bump"
+```
+
+On the Pi:
+
+```sh
+source /opt/ros/jazzy/setup.sh
+ros2 launch custom_counter counter.launch.py
+```
 
 Quick check on the Pi:
 

@@ -1,5 +1,7 @@
 # When Wi-Fi is configured, bring wlan0 up at boot using our wpa_supplicant config.
 # brcmfmac loads asynchronously (module + firmware), so wait for wlan0 to appear.
+# brcmfmac enables Wi-Fi power save by default; the Pi then answers ARP/ping
+# unreliably and may look absent from the network, so turn it off.
 WIFI_SSID_HEX ??= ""
 RPI_HOSTNAME ??= ""
 
@@ -13,6 +15,7 @@ do_install:append() {
         sed -i \
             -e '/^iface wlan0 inet dhcp/i auto wlan0' \
             -e '/^iface wlan0 inet dhcp/a \	pre-up n=0; while [ ! -e /sys/class/net/wlan0 ] && [ $n -lt 20 ]; do sleep 1; n=$((n+1)); done' \
+            -e '/^iface wlan0 inet dhcp/a \	post-up iw dev wlan0 set power_save off || true' \
             -e 's#wpa-driver wext#wpa-driver nl80211,wext#' \
             -e 's#wpa-conf /etc/wpa_supplicant.conf#wpa-conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf#' \
             ${D}${sysconfdir}/network/interfaces
