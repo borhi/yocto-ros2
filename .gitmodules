@@ -1,4 +1,4 @@
 [submodule "meta-custom/recipes-ros/custom-counter/files/ros2-custom-counter"]
 	path = meta-custom/recipes-ros/custom-counter/files/ros2-custom-counter
-	url = git@github.com-personal:borhi/ros2-custom-counter.git
+	url = https://github.com/borhi/ros2-custom-counter.git
 	branch = main
